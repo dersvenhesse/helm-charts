@@ -64,7 +64,7 @@ func ClientCerts(dot *helmette.Dot) []*certmanagerv1.Certificate {
 				Kind:       "Certificate",
 			},
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      fmt.Sprintf("%s-%s-cert", fullname, name),
+				Name:      data.CertificateSecretName(dot, name),
 				Labels:    FullLabels(dot),
 				Namespace: dot.Release.Namespace,
 			},
@@ -112,7 +112,7 @@ func ClientCerts(dot *helmette.Dot) []*certmanagerv1.Certificate {
 			Kind:       "Certificate",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:   fmt.Sprintf("%s-client", fullname),
+			Name:   data.ClientCertificateSecretName(dot),
 			Labels: FullLabels(dot),
 		},
 		Spec: certmanagerv1.CertificateSpec{

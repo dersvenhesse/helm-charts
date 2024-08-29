@@ -281,16 +281,11 @@ func CommonVolumes(dot *helmette.Dot) []corev1.Volume {
 		adminTLS := values.Listeners.Admin.TLS
 		cert := values.TLS.Certs[adminTLS.Cert]
 		if adminTLS.RequireClientAuth {
-			secretName := fmt.Sprintf("%s-client", Fullname(dot))
-			if cert.ClientSecretRef != nil {
-				secretName = cert.ClientSecretRef.Name
-			}
-
 			volumes = append(volumes, corev1.Volume{
 				Name: "mtls-client",
 				VolumeSource: corev1.VolumeSource{
 					Secret: &corev1.SecretVolumeSource{
-						SecretName:  secretName,
+						SecretName:  cert.ClientCertificateSecretName(dot),
 						DefaultMode: ptr.To[int32](0o440),
 					},
 				},

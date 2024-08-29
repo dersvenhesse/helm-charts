@@ -35,6 +35,17 @@ func PostInstallUpgradeJob(dot *helmette.Dot) *batchv1.Job {
 		return nil
 	}
 
+	mounts := DefaultMounts(dot)
+	volumes := DefaultVolumes(dot)
+
+	if vol := values.Listeners.TrustStoreVolume(&values.TLS); vol != nil {
+		volumes = append(volumes, *vol)
+		mounts = append(
+			mounts,
+			corev1.VolumeMount{Name: "truststores", MountPath: TrustStoreMountPath, ReadOnly: true},
+		)
+	}
+
 	job := &batchv1.Job{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "batch/v1",
@@ -91,10 +102,10 @@ func PostInstallUpgradeJob(dot *helmette.Dot) *batchv1.Job {
 								ptr.Deref(values.PostInstallJob.SecurityContext, corev1.SecurityContext{}),
 								ContainerSecurityContext(dot),
 							)),
-							VolumeMounts: DefaultMounts(dot),
+							VolumeMounts: mounts,
 						},
 					},
-					Volumes:            DefaultVolumes(dot),
+					Volumes:            volumes,
 					ServiceAccountName: ServiceAccountName(dot),
 				},
 			}),

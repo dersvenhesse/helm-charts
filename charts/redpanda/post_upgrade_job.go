@@ -26,6 +26,17 @@ func PostUpgrade(dot *helmette.Dot) *batchv1.Job {
 		"helm.sh/hook-weight":        "-10",
 	}, annotations)
 
+	mounts := DefaultMounts(dot)
+	volumes := DefaultVolumes(dot)
+
+	if vol := values.Listeners.TrustStoreVolume(&values.TLS); vol != nil {
+		volumes = append(volumes, *vol)
+		mounts = append(
+			mounts,
+			corev1.VolumeMount{Name: "truststores", MountPath: TrustStoreMountPath, ReadOnly: true},
+		)
+	}
+
 	return &batchv1.Job{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "batch/v1",
@@ -69,10 +80,10 @@ func PostUpgrade(dot *helmette.Dot) *batchv1.Job {
 								ContainerSecurityContext(dot),
 							)),
 							Resources:    values.PostUpgradeJob.Resources,
-							VolumeMounts: DefaultMounts(dot),
+							VolumeMounts: mounts,
 						},
 					},
-					Volumes: DefaultVolumes(dot),
+					Volumes: volumes,
 				},
 			}),
 		},

@@ -283,11 +283,7 @@
 {{- $adminTLS := $values.listeners.admin.tls -}}
 {{- $cert := (index $values.tls.certs $adminTLS.cert) -}}
 {{- if $adminTLS.requireClientAuth -}}
-{{- $secretName := (printf "%s-client" (get (fromJson (include "redpanda.Fullname" (dict "a" (list $dot) ))) "r")) -}}
-{{- if (ne $cert.clientSecretRef (coalesce nil)) -}}
-{{- $secretName = $cert.clientSecretRef.name -}}
-{{- end -}}
-{{- $volumes = (concat (default (list ) $volumes) (list (mustMergeOverwrite (dict "name" "" ) (mustMergeOverwrite (dict ) (dict "secret" (mustMergeOverwrite (dict ) (dict "secretName" $secretName "defaultMode" (0o440 | int) )) )) (dict "name" "mtls-client" )))) -}}
+{{- $volumes = (concat (default (list ) $volumes) (list (mustMergeOverwrite (dict "name" "" ) (mustMergeOverwrite (dict ) (dict "secret" (mustMergeOverwrite (dict ) (dict "secretName" (get (fromJson (include "redpanda.TLSCert.ClientCertificateSecretName" (dict "a" (list $cert $dot) ))) "r") "defaultMode" (0o440 | int) )) )) (dict "name" "mtls-client" )))) -}}
 {{- end -}}
 {{- end -}}
 {{- $sasl_6 := $values.auth.sasl -}}

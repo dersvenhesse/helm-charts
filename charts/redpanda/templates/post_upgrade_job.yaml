@@ -13,8 +13,15 @@
 {{- $labels := (default (dict ) $values.post_upgrade_job.labels) -}}
 {{- $annotations := (default (dict ) $values.post_upgrade_job.annotations) -}}
 {{- $annotations = (merge (dict ) (dict "helm.sh/hook" "post-upgrade" "helm.sh/hook-delete-policy" "before-hook-creation" "helm.sh/hook-weight" "-10" ) $annotations) -}}
+{{- $mounts := (get (fromJson (include "redpanda.DefaultMounts" (dict "a" (list $dot) ))) "r") -}}
+{{- $volumes := (get (fromJson (include "redpanda.DefaultVolumes" (dict "a" (list $dot) ))) "r") -}}
+{{- $vol_1 := (get (fromJson (include "redpanda.Listeners.TrustStoreVolume" (dict "a" (list $values.listeners $values.tls) ))) "r") -}}
+{{- if (ne $vol_1 (coalesce nil)) -}}
+{{- $volumes = (concat (default (list ) $volumes) (list $vol_1)) -}}
+{{- $mounts = (concat (default (list ) $mounts) (list (mustMergeOverwrite (dict "name" "" "mountPath" "" ) (dict "name" "truststores" "mountPath" "/etc/truststores" "readOnly" true )))) -}}
+{{- end -}}
 {{- $_is_returning = true -}}
-{{- (dict "r" (mustMergeOverwrite (dict "metadata" (dict "creationTimestamp" (coalesce nil) ) "spec" (dict "template" (dict "metadata" (dict "creationTimestamp" (coalesce nil) ) "spec" (dict "containers" (coalesce nil) ) ) ) "status" (dict ) ) (mustMergeOverwrite (dict ) (dict "apiVersion" "batch/v1" "kind" "Job" )) (dict "metadata" (mustMergeOverwrite (dict "creationTimestamp" (coalesce nil) ) (dict "name" (printf "%s-post-upgrade" (get (fromJson (include "redpanda.Name" (dict "a" (list $dot) ))) "r")) "namespace" $dot.Release.Namespace "labels" (merge (dict ) (get (fromJson (include "redpanda.FullLabels" (dict "a" (list $dot) ))) "r") $labels) "annotations" $annotations )) "spec" (mustMergeOverwrite (dict "template" (dict "metadata" (dict "creationTimestamp" (coalesce nil) ) "spec" (dict "containers" (coalesce nil) ) ) ) (dict "backoffLimit" $values.post_upgrade_job.backoffLimit "template" (get (fromJson (include "redpanda.StrategicMergePatch" (dict "a" (list $values.post_upgrade_job.podTemplate (mustMergeOverwrite (dict "metadata" (dict "creationTimestamp" (coalesce nil) ) "spec" (dict "containers" (coalesce nil) ) ) (dict "metadata" (mustMergeOverwrite (dict "creationTimestamp" (coalesce nil) ) (dict "name" $dot.Release.Name "labels" (merge (dict ) (dict "app.kubernetes.io/name" (get (fromJson (include "redpanda.Name" (dict "a" (list $dot) ))) "r") "app.kubernetes.io/instance" $dot.Release.Name "app.kubernetes.io/component" (printf "%s-post-upgrade" (trunc (50 | int) (get (fromJson (include "redpanda.Name" (dict "a" (list $dot) ))) "r"))) ) $values.commonLabels) )) "spec" (mustMergeOverwrite (dict "containers" (coalesce nil) ) (dict "nodeSelector" $values.nodeSelector "affinity" (merge (dict ) $values.post_upgrade_job.affinity $values.affinity) "tolerations" $values.tolerations "restartPolicy" "Never" "securityContext" (get (fromJson (include "redpanda.PodSecurityContext" (dict "a" (list $dot) ))) "r") "serviceAccountName" (get (fromJson (include "redpanda.ServiceAccountName" (dict "a" (list $dot) ))) "r") "imagePullSecrets" (default (coalesce nil) $values.imagePullSecrets) "containers" (list (mustMergeOverwrite (dict "name" "" "resources" (dict ) ) (dict "name" "post-upgrade" "image" (printf "%s:%s" $values.image.repository (get (fromJson (include "redpanda.Tag" (dict "a" (list $dot) ))) "r")) "command" (list "/bin/bash" "-c") "args" (list (get (fromJson (include "redpanda.PostUpgradeJobScript" (dict "a" (list $dot) ))) "r")) "env" $values.post_upgrade_job.extraEnv "envFrom" $values.post_upgrade_job.extraEnvFrom "securityContext" (merge (dict ) (get (fromJson (include "_shims.ptr_Deref" (dict "a" (list $values.post_upgrade_job.securityContext (mustMergeOverwrite (dict ) (dict ))) ))) "r") (get (fromJson (include "redpanda.ContainerSecurityContext" (dict "a" (list $dot) ))) "r")) "resources" $values.post_upgrade_job.resources "volumeMounts" (get (fromJson (include "redpanda.DefaultMounts" (dict "a" (list $dot) ))) "r") ))) "volumes" (get (fromJson (include "redpanda.DefaultVolumes" (dict "a" (list $dot) ))) "r") )) ))) ))) "r") )) ))) | toJson -}}
+{{- (dict "r" (mustMergeOverwrite (dict "metadata" (dict "creationTimestamp" (coalesce nil) ) "spec" (dict "template" (dict "metadata" (dict "creationTimestamp" (coalesce nil) ) "spec" (dict "containers" (coalesce nil) ) ) ) "status" (dict ) ) (mustMergeOverwrite (dict ) (dict "apiVersion" "batch/v1" "kind" "Job" )) (dict "metadata" (mustMergeOverwrite (dict "creationTimestamp" (coalesce nil) ) (dict "name" (printf "%s-post-upgrade" (get (fromJson (include "redpanda.Name" (dict "a" (list $dot) ))) "r")) "namespace" $dot.Release.Namespace "labels" (merge (dict ) (get (fromJson (include "redpanda.FullLabels" (dict "a" (list $dot) ))) "r") $labels) "annotations" $annotations )) "spec" (mustMergeOverwrite (dict "template" (dict "metadata" (dict "creationTimestamp" (coalesce nil) ) "spec" (dict "containers" (coalesce nil) ) ) ) (dict "backoffLimit" $values.post_upgrade_job.backoffLimit "template" (get (fromJson (include "redpanda.StrategicMergePatch" (dict "a" (list $values.post_upgrade_job.podTemplate (mustMergeOverwrite (dict "metadata" (dict "creationTimestamp" (coalesce nil) ) "spec" (dict "containers" (coalesce nil) ) ) (dict "metadata" (mustMergeOverwrite (dict "creationTimestamp" (coalesce nil) ) (dict "name" $dot.Release.Name "labels" (merge (dict ) (dict "app.kubernetes.io/name" (get (fromJson (include "redpanda.Name" (dict "a" (list $dot) ))) "r") "app.kubernetes.io/instance" $dot.Release.Name "app.kubernetes.io/component" (printf "%s-post-upgrade" (trunc (50 | int) (get (fromJson (include "redpanda.Name" (dict "a" (list $dot) ))) "r"))) ) $values.commonLabels) )) "spec" (mustMergeOverwrite (dict "containers" (coalesce nil) ) (dict "nodeSelector" $values.nodeSelector "affinity" (merge (dict ) $values.post_upgrade_job.affinity $values.affinity) "tolerations" $values.tolerations "restartPolicy" "Never" "securityContext" (get (fromJson (include "redpanda.PodSecurityContext" (dict "a" (list $dot) ))) "r") "serviceAccountName" (get (fromJson (include "redpanda.ServiceAccountName" (dict "a" (list $dot) ))) "r") "imagePullSecrets" (default (coalesce nil) $values.imagePullSecrets) "containers" (list (mustMergeOverwrite (dict "name" "" "resources" (dict ) ) (dict "name" "post-upgrade" "image" (printf "%s:%s" $values.image.repository (get (fromJson (include "redpanda.Tag" (dict "a" (list $dot) ))) "r")) "command" (list "/bin/bash" "-c") "args" (list (get (fromJson (include "redpanda.PostUpgradeJobScript" (dict "a" (list $dot) ))) "r")) "env" $values.post_upgrade_job.extraEnv "envFrom" $values.post_upgrade_job.extraEnvFrom "securityContext" (merge (dict ) (get (fromJson (include "_shims.ptr_Deref" (dict "a" (list $values.post_upgrade_job.securityContext (mustMergeOverwrite (dict ) (dict ))) ))) "r") (get (fromJson (include "redpanda.ContainerSecurityContext" (dict "a" (list $dot) ))) "r")) "resources" $values.post_upgrade_job.resources "volumeMounts" $mounts ))) "volumes" $volumes )) ))) ))) "r") )) ))) | toJson -}}
 {{- break -}}
 {{- end -}}
 {{- end -}}
@@ -35,22 +42,22 @@
 {{- $asInt64 = (min $asInt64 ($r | int64)) -}}
 {{- end -}}
 {{- $tmp_tuple_2 := (get (fromJson (include "_shims.compact" (dict "a" (list (get (fromJson (include "_shims.typetest" (dict "a" (list "bool" $value false) ))) "r")) ))) "r") -}}
-{{- $ok_2 := $tmp_tuple_2.T2 -}}
-{{- $asBool_1 := $tmp_tuple_2.T1 -}}
+{{- $ok_3 := $tmp_tuple_2.T2 -}}
+{{- $asBool_2 := $tmp_tuple_2.T1 -}}
 {{- $tmp_tuple_3 := (get (fromJson (include "_shims.compact" (dict "a" (list (get (fromJson (include "_shims.typetest" (dict "a" (list "string" $value "") ))) "r")) ))) "r") -}}
-{{- $ok_4 := $tmp_tuple_3.T2 -}}
-{{- $asStr_3 := $tmp_tuple_3.T1 -}}
+{{- $ok_5 := $tmp_tuple_3.T2 -}}
+{{- $asStr_4 := $tmp_tuple_3.T1 -}}
 {{- $tmp_tuple_4 := (get (fromJson (include "_shims.compact" (dict "a" (list (get (fromJson (include "_shims.typetest" (dict "a" (list (printf "[]%s" "interface {}") $value (coalesce nil)) ))) "r")) ))) "r") -}}
-{{- $ok_6 := $tmp_tuple_4.T2 -}}
-{{- $asSlice_5 := $tmp_tuple_4.T1 -}}
-{{- if (and $ok_2 $asBool_1) -}}
-{{- $script = (concat (default (list ) $script) (list (printf "rpk cluster config set %s %t" $key $asBool_1))) -}}
-{{- else -}}{{- if (and $ok_4 (ne $asStr_3 "")) -}}
-{{- $script = (concat (default (list ) $script) (list (printf "rpk cluster config set %s %s" $key $asStr_3))) -}}
+{{- $ok_7 := $tmp_tuple_4.T2 -}}
+{{- $asSlice_6 := $tmp_tuple_4.T1 -}}
+{{- if (and $ok_3 $asBool_2) -}}
+{{- $script = (concat (default (list ) $script) (list (printf "rpk cluster config set %s %t" $key $asBool_2))) -}}
+{{- else -}}{{- if (and $ok_5 (ne $asStr_4 "")) -}}
+{{- $script = (concat (default (list ) $script) (list (printf "rpk cluster config set %s %s" $key $asStr_4))) -}}
 {{- else -}}{{- if (and $isInt64 (gt $asInt64 (0 | int64))) -}}
 {{- $script = (concat (default (list ) $script) (list (printf "rpk cluster config set %s %d" $key $asInt64))) -}}
-{{- else -}}{{- if (and $ok_6 (gt ((get (fromJson (include "_shims.len" (dict "a" (list $asSlice_5) ))) "r") | int) (0 | int))) -}}
-{{- $script = (concat (default (list ) $script) (list (printf `rpk cluster config set %s "[ %s ]"` $key (join "," $asSlice_5)))) -}}
+{{- else -}}{{- if (and $ok_7 (gt ((get (fromJson (include "_shims.len" (dict "a" (list $asSlice_6) ))) "r") | int) (0 | int))) -}}
+{{- $script = (concat (default (list ) $script) (list (printf `rpk cluster config set %s "[ %s ]"` $key (join "," $asSlice_6)))) -}}
 {{- else -}}{{- if (not (empty $value)) -}}
 {{- $script = (concat (default (list ) $script) (list (printf "rpk cluster config set %s %v" $key $value))) -}}
 {{- end -}}
@@ -63,8 +70,8 @@
 {{- break -}}
 {{- end -}}
 {{- $tmp_tuple_5 := (get (fromJson (include "_shims.compact" (dict "a" (list (get (fromJson (include "_shims.dicttest" (dict "a" (list $values.config.cluster "storage_min_free_bytes" (coalesce nil)) ))) "r")) ))) "r") -}}
-{{- $ok_7 := $tmp_tuple_5.T2 -}}
-{{- if (not $ok_7) -}}
+{{- $ok_8 := $tmp_tuple_5.T2 -}}
+{{- if (not $ok_8) -}}
 {{- $script = (concat (default (list ) $script) (list (printf "rpk cluster config set storage_min_free_bytes %d" ((get (fromJson (include "redpanda.Storage.StorageMinFreeBytes" (dict "a" (list $values.storage) ))) "r") | int64)))) -}}
 {{- end -}}
 {{- if (get (fromJson (include "redpanda.RedpandaAtLeast_23_2_1" (dict "a" (list $dot) ))) "r") -}}

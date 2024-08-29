@@ -524,6 +524,39 @@
 {{- end -}}
 {{- end -}}
 
+{{- define "redpanda.TLSCert.CertificateSecretName" -}}
+{{- $c := (index .a 0) -}}
+{{- $dot := (index .a 1) -}}
+{{- $name := (index .a 2) -}}
+{{- range $_ := (list 1) -}}
+{{- $_is_returning := false -}}
+{{- if (ne $c.secretRef (coalesce nil)) -}}
+{{- $_is_returning = true -}}
+{{- (dict "r" $c.secretRef.name) | toJson -}}
+{{- break -}}
+{{- end -}}
+{{- $_is_returning = true -}}
+{{- (dict "r" (printf "%s-%s-cert" (get (fromJson (include "redpanda.Fullname" (dict "a" (list $dot) ))) "r") $name)) | toJson -}}
+{{- break -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "redpanda.TLSCert.ClientCertificateSecretName" -}}
+{{- $c := (index .a 0) -}}
+{{- $dot := (index .a 1) -}}
+{{- range $_ := (list 1) -}}
+{{- $_is_returning := false -}}
+{{- if (ne $c.clientSecretRef (coalesce nil)) -}}
+{{- $_is_returning = true -}}
+{{- (dict "r" $c.clientSecretRef.name) | toJson -}}
+{{- break -}}
+{{- end -}}
+{{- $_is_returning = true -}}
+{{- (dict "r" (printf "%s-client" (get (fromJson (include "redpanda.Fullname" (dict "a" (list $dot) ))) "r"))) | toJson -}}
+{{- break -}}
+{{- end -}}
+{{- end -}}
+
 {{- define "redpanda.TLSCertMap.MustGet" -}}
 {{- $m := (index .a 0) -}}
 {{- $name := (index .a 1) -}}

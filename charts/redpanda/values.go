@@ -934,6 +934,27 @@ type TLSCert struct {
 	ClientSecretRef       *corev1.LocalObjectReference `json:"clientSecretRef"`
 }
 
+// CertificateSecretName returns the name of the [corev1.Secret] that holds the
+// server certificate for this TLSCert.
+func (c *TLSCert) CertificateSecretName(dot *helmette.Dot, name string) string {
+	if c.SecretRef != nil {
+		return c.SecretRef.Name
+	}
+
+	return fmt.Sprintf("%s-%s-cert", Fullname(dot), name)
+}
+
+// ClientCertificateSecretName returns the name of the [corev1.Secret] that
+// holds the client certificate for this TLSCert. This should only be used when
+// the listener for this TLSCert specifies require_client_auth: true.
+func (c *TLSCert) ClientCertificateSecretName(dot *helmette.Dot) string {
+	if c.ClientSecretRef != nil {
+		return c.ClientSecretRef.Name
+	}
+
+	return fmt.Sprintf("%s-client", Fullname(dot))
+}
+
 type TLSCertMap map[string]TLSCert
 
 // +gotohelm:ignore=true
