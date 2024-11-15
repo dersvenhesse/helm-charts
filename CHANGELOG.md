@@ -10,6 +10,15 @@
 * Calculating Service typed LoadBalancer annotation based on external addresses (even single one)
 #### Removed
 
+### [5.9.10](https://github.com/redpanda-data/helm-charts/releases/tag/redpanda-5.9.10) - 2024-11-15
+#### Added
+#### Changed
+* Chart version to update operator side-car container tag
+#### Fixed
+* All occurrence of External Domain execution via tpl function
+* Calculating Service typed LoadBalancer annotation based on external addresses (even single one)
+#### Removed
+
 ### [5.9.9](https://github.com/redpanda-data/helm-charts/releases/tag/redpanda-5.9.9) - 2024-10-24
 #### Added
 * Strategic merge of Pod volumes and Container volumeMounts
@@ -222,6 +231,13 @@
 ### [Unreleased](https://github.com/redpanda-data/helm-charts/releases/tag/operator-FILLMEIN) - YYYY-MM-DD
 #### Added
 #### Changed
+#### Fixed
+#### Removed
+
+### [0.4.33](https://github.com/redpanda-data/helm-charts/releases/tag/operator-0.4.33) - 2024-11-15
+#### Added
+#### Changed
+* Application version for newly operator release v2.3.0-24.2.10
 #### Fixed
 #### Removed
 
